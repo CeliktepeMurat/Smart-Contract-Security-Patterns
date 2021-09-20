@@ -16,13 +16,35 @@ contract VictimContract {
     rate = 2;
   }
 
+  function depositEther() public payable {
+    if (msg.value > 0) {
+      etherBalance[msg.sender] += msg.value;
+    }
+  }
+
+  function exchangeTokenToEther(uint256 _amount) public {
+    require(tokenBalance[msg.sender] >= _amount);
+
+    uint256 etherAmount = _amount * rate;
+    etherBalance[msg.sender] += etherAmount;
+    tokenBalance[msg.sender] -= _amount;
+  }
+
+  function exchangeEtherToToken(uint256 _amount) public payable {
+    require(etherBalance[msg.sender] >= _amount);
+
+    uint256 tokenAmount = _amount / rate;
+    etherBalance[msg.sender] -= _amount;
+    tokenBalance[msg.sender] += tokenAmount;
+  }
+
   /**
   // @notice This is the function that will be abused by the attacker during the re-entrancy attack
    */
-  function exchangeAndWithdrawToken(uint256 amount) public {
-    if (tokenBalance[msg.sender] >= amount) {
+  function exchangeAndWithdrawToken(uint256 _amount) public {
+    if (tokenBalance[msg.sender] >= _amount) {
       uint256 etherAmount = tokenBalance[msg.sender] * rate;
-      tokenBalance[msg.sender] -= amount;
+      tokenBalance[msg.sender] -= _amount;
 
       payable(msg.sender).transfer(etherAmount);
     }
@@ -38,8 +60,10 @@ contract VictimContract {
       // This state update acts as a re-entrancy guard into this function.
       etherBalance[msg.sender] = 0;
 
-      // external call. The attacker cannot re-enter withdrawAll, since
+      /**
+      // @notice external call. The attacker cannot re-enter withdrawAll, since
       // etherBalance[msg.sender] is already 0.
+       */
       msg.sender.call{ value: amount };
 
       // problematic state update, after the external call.
