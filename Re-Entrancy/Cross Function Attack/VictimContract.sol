@@ -40,7 +40,7 @@ contract VictimContract {
 
       // external call. The attacker cannot re-enter withdrawAll, since
       // etherBalance[msg.sender] is already 0.
-      msg.sender.call{value: e};
+      msg.sender.call{ value: e };
 
       // problematic state update, after the external call.
       tokenBalance[msg.sender] = 0;
