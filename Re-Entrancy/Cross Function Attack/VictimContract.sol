@@ -16,14 +16,14 @@ contract VictimContract {
     rate = 2;
   }
 
-  // This is the function that will be abused by the attacker during the
-  // re-entrancy attack
+  /**
+  // @notice This is the function that will be abused by the attacker during the re-entrancy attack
+   */
   function exchangeAndWithdrawToken(uint256 amount) public {
     if (tokenBalance[msg.sender] >= amount) {
       uint256 etherAmount = tokenBalance[msg.sender] * rate;
       tokenBalance[msg.sender] -= amount;
-      // safe because it uses the gas-limited transfer function, which
-      // does not allow further calls.
+
       payable(msg.sender).transfer(etherAmount);
     }
   }
@@ -33,17 +33,21 @@ contract VictimContract {
     uint256 etherAmount = etherBalance[msg.sender];
     uint256 tokenAmount = tokenBalance[msg.sender];
     if (etherAmount > 0 && tokenAmount > 0) {
-      uint256 e = etherAmount + (tokenAmount * rate);
+      uint256 amount = etherAmount + (tokenAmount * rate);
 
       // This state update acts as a re-entrancy guard into this function.
       etherBalance[msg.sender] = 0;
 
       // external call. The attacker cannot re-enter withdrawAll, since
       // etherBalance[msg.sender] is already 0.
-      msg.sender.call{ value: e };
+      msg.sender.call{ value: amount };
 
       // problematic state update, after the external call.
       tokenBalance[msg.sender] = 0;
     }
+  }
+
+  function getTokenCount() public view returns (uint256) {
+    return tokenBalance[msg.sender];
   }
 }
