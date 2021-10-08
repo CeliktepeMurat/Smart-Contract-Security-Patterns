@@ -19,7 +19,6 @@ contract Bank {
   SafeSender sender;
 
   constructor(SafeSender _safesender) {
-    // for solidity 0.4.21
     /*function Bank(SafeSending _safesender) public {*/
     owner = msg.sender;
     sender = _safesender;
@@ -50,12 +49,5 @@ contract Bank {
       abi.encodeWithSignature('send(address,uint256)', to, amount)
     );
     require(success);
-
-    // for solidity 0.4.21
-    /*s memory p;                           */
-    /*p.sig = bytes4(0xd0679d34);           */
-    /*p.to = to;                            */
-    /*p.amount = amount;                    */
-    /*address(safesender).delegatecall((p));*/
   }
 }
