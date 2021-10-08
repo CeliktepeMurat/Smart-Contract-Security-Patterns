@@ -1,0 +1,3 @@
+## Create Base Re-Entrancy
+
+In this example, multiple contracts interact with each other. The Bank contract utilizes the CREATE instruction to create new subcontracts. Contract creation immediately triggers the execution of the constructor of the newly created contract. This constructor can perform external calls to the unknown. This can lead to re-entrancy scenarios, where the attacker re-enters a contract, during execution of a sub-contracts constructor. For static analysis tools to catch these kinds of problems, they must (1) also analyze combination of contracts and (2) consider the CREATE instruction as an external call, similar to the CALL instruction.
